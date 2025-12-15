@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -10,15 +10,21 @@ export default function VerifyEmail() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
   const { verifyEmail } = useAuth();
+  const hasVerified = useRef(false);
 
   useEffect(() => {
     const verify = async () => {
+      if (hasVerified.current) {
+        return;
+      }
+      
       if (!token) {
         setStatus('error');
         setMessage('Invalid verification link');
         return;
       }
 
+      hasVerified.current = true;
       const result = await verifyEmail(token);
       
       if (result.success) {

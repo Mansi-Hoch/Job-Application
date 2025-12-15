@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -149,18 +149,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const verifyEmail = async (verificationToken: string) => {
+  const verifyEmail = useCallback(async (verificationToken: string) => {
     try {
       const response = await fetch(`${API_URL}/api/auth/verify-email/${verificationToken}`);
       const data = await response.json();
-      if (data.success && user) {
-        setUser({ ...user, isEmailVerified: true });
+      if (data.success) {
+        setUser((prevUser) => prevUser ? { ...prevUser, isEmailVerified: true } : null);
       }
       return { success: data.success, message: data.message };
     } catch {
       return { success: false, message: 'Network error' };
     }
-  };
+  }, []);
 
   const resendVerification = async () => {
     try {
